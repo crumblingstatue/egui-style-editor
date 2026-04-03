@@ -1,0 +1,20 @@
+[package]
+name = "egui-style-editor"
+version = "0.1.0"
+edition = "2024"
+
+[features]
+postcard-serde = ["egui/serde", "dep:serde", "dep:postcard", "dep:base64"]
+
+[dependencies]
+egui.version = "0.34"
+egui.default-features = false
+arboard = "3"
+postcard.version = "1.1"
+postcard.default-features = false
+postcard.features = ["alloc"]
+postcard.optional = true
+base64.version = "0.22"
+base64.optional = true
+serde.version = "1"
+serde.optional = true
