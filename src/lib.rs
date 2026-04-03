@@ -117,11 +117,19 @@ fn seri_ui<T: serde::Serialize + serde::de::DeserializeOwned>(ui: &mut egui::Ui,
 struct PasteKey;
 
 fn cursed_paste_button<F: FnOnce(String)>(ui: &mut egui::Ui, label: &str, fun: F) {
-    let re = ui.button(label);
+    let re = if cfg!(target_arch = "wasm32") {
+        // On web, `RequestPaste` doesn't work, so we hover and paste
+        ui.group(|ui| ui.label("Hover me and paste :)")).response
+    } else {
+        ui.button(label)
+    };
     let btn_id = re.id;
+    // Yes, `contains_pointer()` is intentional. `hovered()` doesn't work reliably.
+    if re.contains_pointer() {
+        ui.memory_mut(|mem| mem.data.insert_temp(btn_id, PasteKey));
+    }
     if re.on_hover_text("Paste from clipboard").clicked() {
         ui.send_viewport_cmd(egui::ViewportCommand::RequestPaste);
-        ui.memory_mut(|mem| mem.data.insert_temp(btn_id, PasteKey));
     }
     let text = ui.input(|inp| {
         for ev in &inp.events {
