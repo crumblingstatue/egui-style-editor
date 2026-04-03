@@ -104,16 +104,37 @@ fn seri_ui<T: serde::Serialize + serde::de::DeserializeOwned>(ui: &mut egui::Ui,
         let out = BASE64_STANDARD.encode(&pc);
         ui.copy_text(out);
     }
-    if ui
-        .button("📋")
-        .on_hover_text("Paste from clipboard")
-        .clicked()
-        && let Ok(mut cb) = arboard::Clipboard::new()
-        && let Ok(text) = cb.get_text()
-        && let Ok(bytes) = BASE64_STANDARD.decode(text)
-        && let Ok(new) = postcard::from_bytes::<T>(&bytes)
+    cursed_paste_button(ui, "📋", |txt| {
+        if let Ok(bytes) = BASE64_STANDARD.decode(txt)
+            && let Ok(new) = postcard::from_bytes::<T>(&bytes)
+        {
+            *val = new;
+        }
+    });
+}
+
+#[derive(Clone, Copy, Default)]
+struct PasteKey;
+
+fn cursed_paste_button<F: FnOnce(String)>(ui: &mut egui::Ui, label: &str, fun: F) {
+    let re = ui.button(label);
+    let btn_id = re.id;
+    if re.on_hover_text("Paste from clipboard").clicked() {
+        ui.send_viewport_cmd(egui::ViewportCommand::RequestPaste);
+        ui.memory_mut(|mem| mem.data.insert_temp(btn_id, PasteKey));
+    }
+    let text = ui.input(|inp| {
+        for ev in &inp.events {
+            if let egui::Event::Paste(text) = ev {
+                return Some(text.clone());
+            }
+        }
+        None
+    });
+    if let Some(txt) = text
+        && ui.memory_mut(|mem| mem.data.remove_temp::<PasteKey>(btn_id).is_some())
     {
-        *val = new;
+        fun(txt)
     }
 }
 
@@ -168,16 +189,11 @@ fn color_ui_inner(color: &mut Color32, ui: &mut egui::Ui) {
     {
         ui.copy_text(color.to_hex());
     }
-    if ui
-        .button("📋")
-        .on_hover_text("from hex color on clipboard")
-        .clicked()
-        && let Ok(mut cb) = arboard::Clipboard::new()
-        && let Ok(text) = cb.get_text()
-        && let Ok(parsed_color) = egui::Color32::from_hex(&text)
-    {
-        *color = parsed_color;
-    }
+    cursed_paste_button(ui, "📋", |txt| {
+        if let Ok(new) = egui::Color32::from_hex(&txt) {
+            *color = new;
+        }
+    });
 }
 
 fn stroke_ui(ui: &mut egui::Ui, stroke: &mut egui::Stroke, label: &str) {

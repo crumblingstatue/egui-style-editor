@@ -9,7 +9,6 @@ postcard-serde = ["egui/serde", "dep:serde", "dep:postcard", "dep:base64"]
 [dependencies]
 egui.version = "0.34"
 egui.default-features = false
-arboard = "3"
 postcard.version = "1.1"
 postcard.default-features = false
 postcard.features = ["alloc"]
