@@ -6,13 +6,17 @@ pub struct StyleEditor {
     edited_style: Option<egui::Style>,
     example_text: String,
     example_num: u8,
+    pub open: bool,
 }
 
 impl StyleEditor {
     pub fn show_window(&mut self, ctx: &egui::Context, custom_colors: &mut [&mut egui::Color32]) {
+        let mut open = self.open;
         egui::Window::new("Style editor")
+            .open(&mut open)
             .min_width(800.0)
             .show(ctx, |ui| self.show_ui(ui, custom_colors));
+        self.open = open;
     }
     pub fn show_ui(&mut self, ui: &mut egui::Ui, custom_colors: &mut [&mut egui::Color32]) {
         if self.initial_style.is_none() {
