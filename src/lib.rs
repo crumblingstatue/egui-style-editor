@@ -31,7 +31,7 @@ impl StyleEditor {
             #[cfg(feature = "postcard-serde")]
             {
                 ui.separator();
-                seri_ui(ui, style);
+                seri_ui(ui, &mut style.visuals);
             }
         });
         ui.separator();
