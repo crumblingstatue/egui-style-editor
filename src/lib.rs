@@ -151,25 +151,30 @@ fn cursed_paste_button<F: FnOnce(String)>(ui: &mut egui::Ui, label: &str, fun: F
 }
 
 fn widgets_ui(ui: &mut egui::Ui, widgets: &mut egui::style::Widgets, example_num: &mut u8) {
-    widget_visuals_ui_top(ui, &mut widgets.noninteractive, "noninteractive");
     ui.group(|ui| {
-        ui.label("Example label in a group");
+        widget_visuals_ui_top(ui, &mut widgets.noninteractive, "noninteractive");
+        ui.group(|ui| {
+            ui.label("Example label in a group");
+        });
     });
     ui.end_row();
-    widget_visuals_ui_top(ui, &mut widgets.inactive, "inactive");
-    widget_visuals_ui_top(ui, &mut widgets.hovered, "hovered");
-    widget_visuals_ui_top(ui, &mut widgets.active, "active");
-    let _ = ui.button("Example button");
-    let _ = ui.add(egui::Slider::new(example_num, 0..=255));
+    ui.group(|ui| {
+        widget_visuals_ui_top(ui, &mut widgets.inactive, "inactive");
+        widget_visuals_ui_top(ui, &mut widgets.hovered, "hovered");
+        widget_visuals_ui_top(ui, &mut widgets.active, "active");
+        let _ = ui.button("Example button");
+        let _ = ui.add(egui::Slider::new(example_num, 0..=255));
+    });
     ui.end_row();
-    widget_visuals_ui_top(ui, &mut widgets.open, "open");
-    ui.end_row();
-    ui.menu_button("Example menu button", |ui| {
+    ui.group(|ui| {
+        widget_visuals_ui_top(ui, &mut widgets.open, "open");
+        ui.menu_button("Example menu button", |ui| {
         ui.menu_button("Open me", |ui| {
             let _ = ui.button("Example nested button");
         });
     });
     ui.small("Active window title uses weak_bg_fill, non-active uses panel bg fill (text uses noninteractive stroke)");
+    });
 }
 
 fn widget_visuals_ui_top(ui: &mut egui::Ui, w_vis: &mut egui::style::WidgetVisuals, label: &str) {
